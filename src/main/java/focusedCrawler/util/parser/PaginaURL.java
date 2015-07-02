@@ -498,7 +498,10 @@ public class PaginaURL implements Pagina {
     
     public PaginaURL(Page page){
         this(page.getURL(),0,0,page.getContent().length(),page.getContent(),null);
-    //    page.setPageURL(this);
+    }
+    
+    public PaginaURL(Page page, StopList stoplist){
+        this(page.getURL(),0,0,page.getContent().length(),page.getContent(),stoplist);
     }
 
     /**

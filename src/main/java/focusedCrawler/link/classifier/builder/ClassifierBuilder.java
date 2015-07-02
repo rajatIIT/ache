@@ -32,6 +32,7 @@ import focusedCrawler.link.classifier.util.WordField;
 import focusedCrawler.link.classifier.util.WordFrequency;
 import focusedCrawler.link.classifier.util.WordFrequencyComparator;
 import focusedCrawler.link.frontier.FrontierTargetRepositoryBaseline;
+import focusedCrawler.util.Page;
 import focusedCrawler.util.ParameterFile;
 import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
@@ -367,7 +368,8 @@ public class ClassifierBuilder {
 		        //url
 			if(!usedURLTemp.contains(element.getLink().toString())){
 				usedURLTemp.add(element.getLink().toString());
-				PaginaURL pageParser = new PaginaURL(new URL("http://"), 0, 0, element.getLink().getFile().length(), element.getLink().getFile().toString(), stoplist);
+			//	PaginaURL pageParser = new PaginaURL(new URL("http://"), 0, 0, element.getLink().getFile().length(), element.getLink().getFile().toString(), stoplist);
+				PaginaURL pageParser = new PaginaURL(new Page(new URL("http://"),element.getLink().getFile().toString()),stoplist);
 				String[] urlTemp = pageParser.palavras();
 				for (int j = 0; j < urlTemp.length; j++) {
 //		            String word =  stemmer.stem(urlTemp[j]);

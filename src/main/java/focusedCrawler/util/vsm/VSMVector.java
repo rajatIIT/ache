@@ -25,20 +25,24 @@ package focusedCrawler.util.vsm;
 
 import java.util.HashMap;
 import java.util.Iterator;
-
 import java.net.URL;
+
 import org.w3c.dom.Document;
 import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+
 import java.net.MalformedURLException;
+
 import org.w3c.dom.NamedNodeMap;
 
 import java.io.IOException;
 import java.io.StringReader;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import focusedCrawler.util.Page;
 import focusedCrawler.util.parser.PaginaURL;
 import focusedCrawler.util.string.PorterStemmer;
 import focusedCrawler.util.string.StopList;
@@ -94,9 +98,12 @@ public class VSMVector {
           StringBuffer source = new StringBuffer();
           parse(list.item(0), source, new StringBuffer(), "html", stoplist);
           srcForm = source.toString().toLowerCase();
-          PaginaURL formPage = new PaginaURL(new URL("http://www"), 0, 0,
-                                             srcForm.length(),
-                                             srcForm, stoplist);
+//          PaginaURL formPage = new PaginaURL(new URL("http://www"), 0, 0,
+//                                             srcForm.length(),
+//                                             srcForm, stoplist);
+          
+          PaginaURL formPage = new PaginaURL( new Page(new URL("http://www"),
+                  srcForm), stoplist);
 
           stemPage(formPage, true);
       } else {
@@ -123,9 +130,13 @@ public class VSMVector {
   
   private void addTitle(PaginaURL page, StopList stoplist) throws MalformedURLException{
 	  this.stoplist = stoplist;
-	  PaginaURL title = new PaginaURL(new URL("http://www"), 0, 0,
-    		  page.titulo().length(),
-    		  page.titulo(), stoplist);
+//	  PaginaURL title = new PaginaURL(new URL("http://www"), 0, 0,
+//    		  page.titulo().length(),
+//    		  page.titulo(), stoplist);
+	  
+	  PaginaURL title = new PaginaURL( new Page(new URL("http://www"),
+              page.titulo()), stoplist);
+	  
 	  String[] titleWords = title.palavras();
 	  String[] metaTerms = page.palavrasMeta();
 	  int[] metaOccurrencies = page.ocorrenciasMeta();
@@ -173,9 +184,11 @@ public class VSMVector {
 	  }
 	  this.stoplist = stoplist;
 	  elems = new HashMap();
-	  PaginaURL page = new PaginaURL(new URL("http://www"), 0, 0,
-                                   document.length(),
-                                   document, stoplist);
+//	  PaginaURL page = new PaginaURL(new URL("http://www"), 0, 0,
+//                                   document.length(),
+//                                   document, stoplist);
+	  
+	  PaginaURL page = new PaginaURL( new Page(new URL("http://www"),document), stoplist);
 	  
     //addTitle(page,stoplist);
 	  if(stem){
@@ -218,9 +231,13 @@ public class VSMVector {
 	  }
 	  this.stoplist = stoplist;
 	  elems = new HashMap();
-	  PaginaURL page = new PaginaURL(new URL("http://www"), 0, 0,
-                                   document.length(),
-                                   document, stoplist);
+//	  PaginaURL page = new PaginaURL(new URL("http://www"), 0, 0,
+//                                   document.length(),
+//                                   document, stoplist);
+	  
+	  PaginaURL page = new PaginaURL( new Page(new URL("http://www"), document), stoplist);
+	  
+	  
     //addTitle(page,stoplist);
 	  stemPage(page, false);
 
@@ -748,6 +765,7 @@ public class VSMVector {
                 pageTemp = new PaginaURL(new URL("http://www"), 0, 0,
                                                    value.length(),
                                                    value, stoplist);
+                pageTemp = new PaginaURL( new Page(new URL("http://www"),value), stoplist);
                 words = pageTemp.palavras();
               }
               catch (MalformedURLException ex) {

@@ -61,10 +61,8 @@ public class PaginaURLTest {
     
     @Test
     public void newConstructorShouldWork() throws MalformedURLException, UnsupportedEncodingException{
-        
         String path = PaginaURLTest.class.getResource("PaginaURL/paginaURLTest").getPath();
         File URLdirecory = new File(path);
-
         File[] allDirectories = URLdirecory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -73,15 +71,10 @@ public class PaginaURLTest {
                 return true;
             }
         });
-        
-        
         File testFile = allDirectories[0].listFiles()[0];
-        
         String source = readContentsOfFile(testFile);
         String url = testFile.getName();
-        
         PaginaURL paginaURL = new PaginaURL(new Page(new URL(URLDecoder.decode(url,StandardCharsets.UTF_8.name())), source));
-        
         assertEquals("Constructor not working properly !",false,paginaURL.getURL().equals(null));
     }
 

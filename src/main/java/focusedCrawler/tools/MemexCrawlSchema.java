@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import focusedCrawler.target.TargetModel;
+import focusedCrawler.util.Page;
 import focusedCrawler.util.parser.PaginaURL;
 
 @JsonInclude(Include.NON_NULL)
@@ -49,7 +50,7 @@ public class MemexCrawlSchema {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("page has an invalid URL: "+model.url);
         }
-        PaginaURL pageParser = new PaginaURL(url, 0, 0, this.raw_content.length(), this.raw_content, null);
+        PaginaURL pageParser = new PaginaURL(new Page(url,this.raw_content));
         
         this.images = new ArrayList<String>(pageParser.getImages());
 //        this.crawl_data.html_title = pageParser.titulo();

@@ -65,9 +65,15 @@ public class ElasticSearchPageModel {
 
         String raw_content = (String) model.response.get("body");
         Page page = new Page(url, raw_content);
-        PaginaURL pageURL = new PaginaURL(url, 0, 0, raw_content.length(), raw_content, null);
-        PaginaURL pageParser = new PaginaURL(page.getURL(), 0, 0, page.getContent().length(),
-                page.getContent(), null);
+        
+//        PaginaURL pageURL = new PaginaURL(url, 0, 0, raw_content.length(), raw_content, null);
+//        PaginaURL pageParser = new PaginaURL(page.getURL(), 0, 0, page.getContent().length(),
+//                page.getContent(), null);
+        
+        PaginaURL pageURL = new PaginaURL(  new Page(url,raw_content));
+        PaginaURL pageParser = new PaginaURL(new Page(page.getURL(),page.getContent()));
+        
+        
         page.setPageURL(pageParser);
 
         this.url = model.url;
