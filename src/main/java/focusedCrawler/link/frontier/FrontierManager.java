@@ -158,7 +158,7 @@ public class FrontierManager {
             }
         } while (limit && priorityQueue.size() > 0);
         int value = (int) linkRelev.getRelevance() / 100;
-
+        
         logger.info("\n> URL:" + linkRelev.getURL() +
                     "\n> REL:" + value +
                     "\n> RELEV:" + linkRelev.getRelevance());

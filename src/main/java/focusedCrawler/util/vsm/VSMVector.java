@@ -762,9 +762,9 @@ public class VSMVector {
               PaginaURL pageTemp = null;
               String[] words = null;
               try {
-                pageTemp = new PaginaURL(new URL("http://www"), 0, 0,
-                                                   value.length(),
-                                                   value, stoplist);
+//                pageTemp = new PaginaURL(new URL("http://www"), 0, 0,
+//                                                   value.length(),
+//                                                   value, stoplist);
                 pageTemp = new PaginaURL( new Page(new URL("http://www"),value), stoplist);
                 words = pageTemp.palavras();
               }
