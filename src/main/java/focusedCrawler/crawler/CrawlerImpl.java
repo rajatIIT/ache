@@ -27,10 +27,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +83,12 @@ public class CrawlerImpl extends Crawler {
     protected int bufferSize;
 
     protected String source;
+    
+    protected Map<String, List<String>> responseHeaders;
+    
+    protected boolean isURLRedirecting=false;
+    
+    protected String redirectedLocation;
     
     protected CrawlerImpl(ThreadGroup tg, String name) {
     	super(tg, name);
@@ -264,6 +273,11 @@ public class CrawlerImpl extends Crawler {
           try {            
             urlFinal = getUrl();
             URLConnection conn = urlFinal.openConnection();
+            
+            responseHeaders = conn.getHeaderFields();
+
+            redirectedLocation =   getRedirectedLocation(conn);
+            
             InputStream in = conn.getInputStream();
             StringBuffer   buffer = new StringBuffer();
             BufferedReader bin = new BufferedReader(new InputStreamReader(in));
@@ -349,6 +363,41 @@ public class CrawlerImpl extends Crawler {
 
 
 
+        private String getRedirectedLocation(URLConnection conn) {
+            if (conn instanceof HttpURLConnection) {
+                HttpURLConnection myHttpUrlConnection = (HttpURLConnection) conn;
+                int responseCode;
+                try {
+                    responseCode = myHttpUrlConnection.getResponseCode();
+                if (responseCode == 301 || responseCode == 302 || responseCode == 303
+                        || responseCode == 304 || responseCode == 305 || responseCode == 306
+                        || responseCode == 307) {
+                    if (responseHeaders.keySet() != null) {
+                        for (String s : responseHeaders.keySet()) {
+                            if (s != null && (s.equals("Location") || s.equals("location"))) {
+                                    // we have a redirecting URL
+                                    isURLRedirecting=true;
+                                    List<String> wholeString = responseHeaders.get(s);
+                                    if (wholeString.size() > 0) {
+                                        StringBuffer redirectingLocation = new StringBuffer();
+                                        for (String strings : wholeString) {
+                                            redirectingLocation.append(strings);
+                                        }
+                                        redirectedLocation =redirectingLocation.toString();
+                                        return redirectedLocation;
+                                    }
+                            }
+                        }
+                    }
+                }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        return null;
+    }
+
         protected void handleNotFound() throws Exception {
           setJump(true,"Url(insert) '" + getUrl() + "' not found.");
         }
@@ -360,7 +409,10 @@ public class CrawlerImpl extends Crawler {
         protected void processData() throws CrawlerException {
             setMessage("URL "+getUrl());
 			try {
-				page = new Page(getUrl(),source);
+			    if(isURLRedirecting)
+	                page = new Page(getUrl(), source, responseHeaders,redirectedLocation);
+	            else
+	                page = new Page(getUrl(),source, responseHeaders);
 				//PaginaURL pageParser = new PaginaURL(page.getURL(), 0, 0,page.getContent().length(),page.getContent(), null);
 				PaginaURL pageParser = new PaginaURL(page);
 				page.setPageURL(pageParser);
