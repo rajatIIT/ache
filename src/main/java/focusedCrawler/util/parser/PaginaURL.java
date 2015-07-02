@@ -35,6 +35,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import focusedCrawler.util.Page;
 import focusedCrawler.util.page.Pagina;
 import focusedCrawler.util.string.Acentos;
 import focusedCrawler.util.string.StopList;
@@ -494,6 +495,11 @@ public class PaginaURL implements Pagina {
      * this(url,vist,mod,tam,arquivo,noindex,nofollow,escopo,max,new StopListArquivo());
      * }
      */
+    
+    public PaginaURL(Page page){
+        this(page.getURL(),0,0,page.getContent().length(),page.getContent(),null);
+    //    page.setPageURL(this);
+    }
 
     /**
      * Construtor que nao esta sujeito a Exceptions, e possui parametros bem
