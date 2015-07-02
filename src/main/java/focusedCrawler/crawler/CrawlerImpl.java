@@ -276,7 +276,7 @@ public class CrawlerImpl extends Crawler {
             
             responseHeaders = conn.getHeaderFields();
 
-            redirectedLocation =   getRedirectedLocation(conn);
+            redirectedLocation =   getRedirectedLocation(conn, responseHeaders);
             
             InputStream in = conn.getInputStream();
             StringBuffer   buffer = new StringBuffer();
@@ -363,7 +363,7 @@ public class CrawlerImpl extends Crawler {
 
 
 
-        private String getRedirectedLocation(URLConnection conn) {
+        public String getRedirectedLocation(URLConnection conn, Map<String, List<String>> responseHeaders) {
             if (conn instanceof HttpURLConnection) {
                 HttpURLConnection myHttpUrlConnection = (HttpURLConnection) conn;
                 int responseCode;
