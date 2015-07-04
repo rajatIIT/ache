@@ -1,4 +1,4 @@
-package focusedCrawler;
+package focusedCrawler.crawler;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,15 +11,49 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import focusedCrawler.crawler.CrawlerImpl;
+public class DownloaderTest {
 
-public class CrawlerImplTest {
+    ArrayList<String> urlsWithMime;
+    String[] testURLs;
+
+    public DownloaderTest() {
+
+    }
 
     @Test
-    public void redirectURLExtractionShouldWork() throws MalformedURLException, IOException {
+    public void downloaderShouldwork() throws MalformedURLException, CrawlerException {
 
         // insert some test URLs which are redirecting in nature
-        String[] testURLs = {
+        testURLs = getTestURLs();
+        ArrayList<String> urlsWithRedirection = new ArrayList<String>();
+        urlsWithMime = new ArrayList<String>();
+
+        for (String s : testURLs) {
+            if (isRedirecting(s))
+                urlsWithRedirection.add(s);
+        }
+
+        if (urlsWithRedirection.size() > 0) {
+
+            for (String eachURL : urlsWithRedirection) {
+                Downloader urlDownloader = new Downloader(eachURL, "test");
+
+                String redirect = urlDownloader.getRedirectionUrl();
+                String mime = urlDownloader.getMimeType();
+                assertEquals("Redirect URL extractor fails! ", true,
+                        (redirect != null && !redirect.isEmpty()));
+                if (urlsWithMime.contains(eachURL))
+                    assertEquals("Mime-Type extractor fails! ", true,
+                            (mime != null && !mime.isEmpty()));
+            }
+
+        }
+    }
+
+    private String[] getTestURLs() {
+
+        String[] urls = new String[] {
+
                 "http://en.wikipedia.org/wiki/ZMapp",
                 "http://en.wikipedia.org/wiki/Dengue_fever",
                 "http://en.wikipedia.org/wiki/Viral_hemorrhagic_fever",
@@ -42,37 +76,7 @@ public class CrawlerImplTest {
                 "http://www.linkedin.com/groups/Health24-Network-4195423?home=&gid=4195423&trk=anet_ug_hm",
                 "http://twitter.com/", "http://pinterest.com/mashable/" };
 
-        ArrayList<String> positiveURLs = new ArrayList<String>();
-
-        for (String s : testURLs) {
-            if (isRedirecting(s))
-                positiveURLs.add(s);
-        }
-
-        if (positiveURLs.size() > 0) {
-            // check the Method
-            CrawlerImpl myImpl = new CrawlerImpl();
-
-            for (String eachURL : positiveURLs) {
-
-                URLConnection myURLConnection = (new URL(eachURL)).openConnection();
-                String redirect = myImpl.getRedirectedLocation(myURLConnection,
-                        myURLConnection.getHeaderFields());
-                assertEquals("Redirect URL extractor fails! ", true,
-                        (redirect != null && !redirect.isEmpty()));
-            }
-
-        }
-
-        // check them first, and store the tested URLs
-
-        // perform the test on tested URLs
-
-    }
-
-    private boolean isNull(String redirect) {
-        // if()
-        return false;
+        return urls;
     }
 
     public boolean isRedirecting(String url) {
@@ -83,9 +87,14 @@ public class CrawlerImplTest {
             URLConnection conn = myUrl.openConnection();
             if (conn instanceof HttpURLConnection) {
                 HttpURLConnection myHttpUrlConnection = (HttpURLConnection) conn;
+
+                if (myHttpUrlConnection.getContentType() != null)
+                    urlsWithMime.add(url);
+
                 int responseCode;
                 try {
                     responseCode = myHttpUrlConnection.getResponseCode();
+
                     if (responseCode == 301 || responseCode == 302 || responseCode == 303
                             || responseCode == 304 || responseCode == 305 || responseCode == 306
                             || responseCode == 307)

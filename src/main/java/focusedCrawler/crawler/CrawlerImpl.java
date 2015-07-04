@@ -84,11 +84,7 @@ public class CrawlerImpl extends Crawler {
 
     protected String source;
     
-    protected Map<String, List<String>> responseHeaders;
-    
-    protected boolean isURLRedirecting=false;
-    
-    protected String redirectedLocation;
+    protected Downloader urlDownloader;
     
     protected CrawlerImpl(ThreadGroup tg, String name) {
     	super(tg, name);
@@ -270,31 +266,40 @@ public class CrawlerImpl extends Crawler {
        */
 
       protected void downloadUrl() throws CrawlerException {
-          try {            
+                    
             urlFinal = getUrl();
-            URLConnection conn = urlFinal.openConnection();
             
-            responseHeaders = conn.getHeaderFields();
-
-            redirectedLocation =   getRedirectedLocation(conn, responseHeaders);
+            urlDownloader = new Downloader(urlFinal,getName());
             
-            InputStream in = conn.getInputStream();
-            StringBuffer   buffer = new StringBuffer();
-            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
-            String inputLine;
-
-            try {
-                while ((inputLine = bin.readLine()) != null) {
-                	buffer.append(inputLine).append("\n");
-                }
-            } catch (IOException ioe) {
-                bin.close();
-
-                throw ioe;
-            }
-
-            bin.close();
-            source = buffer.toString();
+            source = urlDownloader.getContent();
+            
+//            
+//            URLConnection conn = urlFinal.openConnection();
+//            
+//            responseHeaders = conn.getHeaderFields();
+//
+//         //   redirectedLocation =   getRedirectedLocation(conn, responseHeaders);
+//            
+//            InputStream in = conn.getInputStream();
+//            StringBuffer   buffer = new StringBuffer();
+//            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
+//            String inputLine;
+//
+//            try {
+//                while ((inputLine = bin.readLine()) != null) {
+//                	buffer.append(inputLine).append("\n");
+//                }
+//            } catch (IOException ioe) {
+//                bin.close();
+//
+//                throw ioe;
+//            }
+//
+//            bin.close();
+//            source = buffer.toString();
+//            
+//            
+            
 
 //            downloader.clearResponseProperties();
 //            downloader.clearBuffer();
@@ -340,63 +345,8 @@ public class CrawlerImpl extends Crawler {
 //                }
 //              }
 //            }
-          }
-          catch (MalformedURLException exc) {
-            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-          }
-          catch (SocketException exc) {
-            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-          }
-          catch (IOException exc) {
-            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-          }
-//          catch (StorageException exc) {
-//            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-//          }
-//          catch (CommunicationException exc) {
-//            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-//          }
-          catch (Exception exc) {
-            throw new CrawlerException(getName() + ":" + exc.getMessage(), exc);
-          }
+          
         }
-
-
-
-        public String getRedirectedLocation(URLConnection conn, Map<String, List<String>> responseHeaders) {
-            if (conn instanceof HttpURLConnection) {
-                HttpURLConnection myHttpUrlConnection = (HttpURLConnection) conn;
-                int responseCode;
-                try {
-                    responseCode = myHttpUrlConnection.getResponseCode();
-                if (responseCode == 301 || responseCode == 302 || responseCode == 303
-                        || responseCode == 304 || responseCode == 305 || responseCode == 306
-                        || responseCode == 307) {
-                    if (responseHeaders.keySet() != null) {
-                        for (String s : responseHeaders.keySet()) {
-                            if (s != null && (s.equals("Location") || s.equals("location"))) {
-                                    // we have a redirecting URL
-                                    isURLRedirecting=true;
-                                    List<String> wholeString = responseHeaders.get(s);
-                                    if (wholeString.size() > 0) {
-                                        StringBuffer redirectingLocation = new StringBuffer();
-                                        for (String strings : wholeString) {
-                                            redirectingLocation.append(strings);
-                                        }
-                                        redirectedLocation =redirectingLocation.toString();
-                                        return redirectedLocation;
-                                    }
-                            }
-                        }
-                    }
-                }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-        return null;
-    }
 
         protected void handleNotFound() throws Exception {
           setJump(true,"Url(insert) '" + getUrl() + "' not found.");
@@ -409,10 +359,10 @@ public class CrawlerImpl extends Crawler {
         protected void processData() throws CrawlerException {
             setMessage("URL "+getUrl());
 			try {
-			    if(isURLRedirecting)
-	                page = new Page(getUrl(), source, responseHeaders,redirectedLocation);
+			    if(urlDownloader.isRedirection())
+	                page = new Page(getUrl(), source, urlDownloader.getResponseHeaders(),new URL(urlDownloader.getRedirectionUrl()));
 	            else
-	                page = new Page(getUrl(),source, responseHeaders);
+	                page = new Page(getUrl(),source, urlDownloader.getResponseHeaders());
 				//PaginaURL pageParser = new PaginaURL(page.getURL(), 0, 0,page.getContent().length(),page.getContent(), null);
 				PaginaURL pageParser = new PaginaURL(page);
 				page.setPageURL(pageParser);

@@ -59,8 +59,12 @@ public class Page implements Serializable, Target{
     
     private String encoding;
     
-    private String redirectedURL;
+    private URL redirectedURL;
     
+    protected URL getRedirectedURL() {
+        return redirectedURL;
+    }
+
     private Map<String, List<String>> responseHeaders;
     
     public Map<String, List<String>> getResponseHeaders() {
@@ -77,15 +81,12 @@ public class Page implements Serializable, Target{
     }
     
     public Page(URL url, String cont, Map<String, List<String>> responseHeaders) {
-        this.url = url;
-        this.content = cont;
+        this(url,cont);
         this.responseHeaders = responseHeaders;
     }
     
-    public Page(URL url, String cont, Map<String, List<String>> responseHeaders, String redirectedURL) {
-        this.url = url;
-        this.content = cont;
-        this.responseHeaders = responseHeaders;
+    public Page(URL url, String cont, Map<String, List<String>> responseHeaders, URL redirectedURL) {
+        this(url,cont,responseHeaders);
         this.redirectedURL = redirectedURL;
     }
 
