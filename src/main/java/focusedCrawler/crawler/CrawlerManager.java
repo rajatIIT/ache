@@ -201,6 +201,7 @@ public class CrawlerManager extends Thread {
             crawler.setSleepTime(config.getRobotManagerRobotErrorTime());
             crawler.setDownloader(downloader);
             crawler.setPriority(Thread.NORM_PRIORITY);
+            crawler.setMimeTypesAllowed(config.getDownloaderAllowedMimeTypes());
             
             return crawler;
         } catch (Exception exc) {
@@ -385,6 +386,10 @@ public class CrawlerManager extends Thread {
         } catch (StorageFactoryException ex) {
             logger.error("An error occurred while starting CrawlerManager. ", ex);
         }
+    }
+    
+    public void getCrawlerConfig(){
+        
     }
     
 }

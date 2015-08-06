@@ -12,6 +12,7 @@ public class CrawlerManagerConfig {
     private final long robotManagerRobotErrorSleepTime;
     private final int robotManagerRobotThreadFactor;
     private final long downloaderMaxBlockedThreads;
+    private final String downloaderAllowedMimeTypes;
     
     public CrawlerManagerConfig(String filename) {
         ParameterFile params = new ParameterFile(filename);
@@ -23,6 +24,11 @@ public class CrawlerManagerConfig {
         this.robotManagerRobotErrorSleepTime = params.getParamLongOrDefault("ROBOT_MANAGER_ROBOT_ERROR_SLEEP_TIME", 5000);
         this.robotManagerRobotThreadFactor = params.getParamIntOrDefault("ROBOT_MANAGER_ROBOT_THREAD_FACTOR", 10);
         this.downloaderMaxBlockedThreads = params.getParamLongOrDefault("DOWNLOADER_MAX_BLOCKED_THREADS", 20000000);
+        this.downloaderAllowedMimeTypes = params.getParamOrDefault("DOWNLOADER_ALLOWED_MIME_TYPES", "text/html");
+    }
+    
+    public String getDownloaderAllowedMimeTypes() {
+        return downloaderAllowedMimeTypes;
     }
     
     public String getRobotThreadGroup() {
