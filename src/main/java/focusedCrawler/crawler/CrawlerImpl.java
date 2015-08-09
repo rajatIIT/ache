@@ -31,7 +31,10 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
@@ -87,7 +90,7 @@ public class CrawlerImpl extends Crawler {
     
     protected Downloader urlDownloader;
     
-    protected String mimeTypesAllowed;
+    protected List<MimeType> mimeTypesAllowed;
 
     protected CrawlerImpl(ThreadGroup tg, String name) {
     	super(tg, name);
@@ -129,13 +132,30 @@ public class CrawlerImpl extends Crawler {
   }
   
 
-  public String getMimeTypesAllowed() {
+  public List<MimeType> getMimeTypesAllowed() {
       return mimeTypesAllowed;
   }
 
   public void setMimeTypesAllowed(String mimeTypesAllowed) {
       logger.info("Mime types allowed: " + Arrays.toString(mimeTypesAllowed.split(" ")));
-      this.mimeTypesAllowed = mimeTypesAllowed;
+      
+      String[] mimeTypesArray = mimeTypesAllowed.split(" ");  
+      
+      ArrayList<MimeType> mimeAllowed = new ArrayList<MimeType>();
+      
+      for(String eachType : mimeTypesArray){
+          try {
+            mimeAllowed.add(new MimeType(eachType));
+        } catch (MimeTypeParseException e) {
+            logger.error("Issue in parsing mime type",e);
+        }
+      }
+      
+      this.mimeTypesAllowed = mimeAllowed;
+  }
+  
+  public void setMimeTypesAllowed(List<MimeType> mimeTypes) {
+      this.mimeTypesAllowed = mimeTypes;
   }
 
   public void setMaxFileSize(long newMaxFileSize) throws CrawlerException {
@@ -228,12 +248,10 @@ public class CrawlerImpl extends Crawler {
           try {
               long t1 = System.currentTimeMillis();
               setMessage("selectUrl() linkStorage.");
-              LinkRelevance lr;
-           do{   
-              lr = ((LinkRelevance)linkStorage.select(null));
+              
+              LinkRelevance lr = ((LinkRelevance)linkStorage.select(null));
               
               initialUrl = lr.getURL();
-           } while(isAllowedMime(initialUrl));
                
               String host = lr.getURL().getHost();
               
@@ -272,19 +290,21 @@ public class CrawlerImpl extends Crawler {
           }
      }
      
-     private boolean isAllowedMime(URL url) {
+     private boolean isAllowedMime(Downloader mimeDownloader) {
          try {
-            Downloader mimeDownloader = new Downloader(url);
+            
             MimeType mimeType = new MimeType(mimeDownloader.getMimeType());
             
-            String[] allowedTypes = getMimeTypesAllowed().split(" ");
+            List<MimeType> allowedTypes = getMimeTypesAllowed();
             
-            for(String each:allowedTypes){
-                MimeType eachType = new MimeType(each);
-                if(eachType.match(mimeType))
+            Iterator<MimeType> allowedTypeIt = allowedTypes.iterator();
+            
+            while(allowedTypeIt.hasNext()){
+                if(allowedTypeIt.next().match(mimeType))
                     return true;
             }
-        } catch (CrawlerException | MimeTypeParseException e) {
+          
+        } catch (MimeTypeParseException e) {
             logger.error("Please specify mime type in config in format type/subtype",e);
         }
          return false;
@@ -298,9 +318,11 @@ public class CrawlerImpl extends Crawler {
      * This method downloads the URL selected in the selectURL method.
      */
     protected void downloadUrl() throws CrawlerException {
+      do {
         urlFinal = getUrl();
         urlDownloader = new Downloader(urlFinal);
         source = urlDownloader.getContent();
+        } while(!isAllowedMime(urlDownloader));
     }
 
         protected void handleNotFound() throws Exception {
