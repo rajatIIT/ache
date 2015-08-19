@@ -3,8 +3,8 @@ package focusedCrawler.link.classifier.builder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -97,7 +97,7 @@ public class MozAuthenticator {
      * @return
      */
     public String EncodeBase64(byte[] rawData) {
-        return Base64.getEncoder().encodeToString(rawData);
+        return DatatypeConverter.printBase64Binary(rawData);
     }
 
     /**
