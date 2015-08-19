@@ -48,10 +48,10 @@ import java.util.Vector;
 import java.net.URLConnection;
 import java.io.*;
 
-import org.apache.sis.util.logging.LoggerFactory;
 import org.json.JSONArray;
+import org.slf4j.LoggerFactory;
 
-import com.sun.media.jfxmedia.logging.Logger;
+
 
 
 
@@ -167,7 +167,7 @@ public class BacklinkSurfer {
 	      links[i]= jsonArray.getJSONObject(i).getString("uu");    
 	  }
 	  
-	  org.slf4j.LoggerFactory.getLogger(BacklinkSurfer.class).info("DOWNLOADED BACKLINKS: " + Arrays.toString(links));
+	  LoggerFactory.getLogger(BacklinkSurfer.class).info("DOWNLOADED BACKLINKS: " + Arrays.toString(links));
 	  
 	  
 	  BackLinkNeighborhood[] backlinks = new BackLinkNeighborhood[links.length];
