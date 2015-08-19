@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +47,14 @@ import java.io.FileWriter;
 import java.util.Vector;
 import java.net.URLConnection;
 import java.io.*;
+
+import org.apache.sis.util.logging.LoggerFactory;
+import org.json.JSONArray;
+
+import com.sun.media.jfxmedia.logging.Logger;
+
+
+
 
 public class BacklinkSurfer {
 
@@ -130,12 +139,37 @@ public class BacklinkSurfer {
   }
   
   private BackLinkNeighborhood[] downloadBacklinks(String host) throws IOException{
-	  String backlink = "http://lsapi.seomoz.com/linkscape/links/" + host +"?AccessID=member-2e52b09aae&Expires=1365280453&Signature=WFcSAnhBG62xmt2f57bGrqCtiOM%3D&Filter=external&Scope=page_to_page&Limit=50&Sort=page_authority&SourceCols=4&TargetCols=4"; 
+	//  String backlink = "http://lsapi.seomoz.com/linkscape/links/" + host +"?AccessID=member-2e52b09aae&Expires=1365280453&Signature=WFcSAnhBG62xmt2f57bGrqCtiOM%3D&Filter=external&Scope=page_to_page&Limit=50&Sort=page_authority&SourceCols=4&TargetCols=4";
+	  
+	  String access = "mozscape-4a1d0827fc";
+      String key = "d6ea0c3b253ab44425769e422624a0f";
+      
+      
+      MozAuthenticator myAuthenticator = new MozAuthenticator(access,key,50000);
+      String authStr = myAuthenticator.getAuthenticationStr();
+      
+      String queryStr = "?Filter=external&Scope=page_to_page&Limit=50&Sort=page_authority&SourceCols=4&TargetCols=4&";
+      
+      String path = "http://lsapi.seomoz.com/linkscape/links/" + host +    queryStr + authStr;   // url-metrics/moz.com%2fblog?cols=5&";
+	  String backlink = path;
+      
 	  Page page = downloadPage(newURL(backlink));
 	  if (page == null) {
 		  return null;
 	  }
-	  String[] links = wrapperURL.filterMultipleStrings(page.getContent());
+	  
+	//  String[] links = wrapperURL.filterMultipleStrings(page.getContent());
+	  
+	  JSONArray jsonArray = new JSONArray(page.getContent());
+	  String[] links = new String[jsonArray.length()];
+	  
+	  for(int i=0;i<jsonArray.length();i++){
+	      links[i]= jsonArray.getJSONObject(i).getString("uu");    
+	  }
+	  
+	  org.slf4j.LoggerFactory.getLogger(BacklinkSurfer.class).info("DOWNLOADED BACKLINKS: " + Arrays.toString(links));
+	  
+	  
 	  BackLinkNeighborhood[] backlinks = new BackLinkNeighborhood[links.length];
 	  for (int i = 0; i < links.length; i++) {
 		  backlinks[i] = new BackLinkNeighborhood();

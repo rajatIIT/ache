@@ -235,6 +235,7 @@ public class Main {
     }
 
     private static void startCrawlManager(final String configPath) {
+        System.out.println("Executing start crawl.");
         try {
             CrawlerManager.main(new String[] { configPath });
         } catch (Throwable t) {
