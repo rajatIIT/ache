@@ -168,6 +168,7 @@ public class Main {
     }
 
     private static void buildModel(CommandLine cmd) throws MissingArgumentException {
+        System.out.println("Execute bm");
         String stopWordsFile = getMandatoryOptionValue(cmd, "stopWordsFile");
         String trainingPath = getMandatoryOptionValue(cmd, "trainingDataDir");
         String outputPath = getMandatoryOptionValue(cmd, "outputDir"); 
